@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 HOST=$(hostname)
-HOST_IP=$(hostname -I)
+HOST_IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}' || hostname -I)
 CLUSTER_NAME=cluster_1
 
 # get donor node from command line argument, if not provided, use HOST_IP -> current node as donor
@@ -154,7 +154,7 @@ echo "configuring node $HOST ..."
 if [[ $NODE_DONOR != $HOST_IP ]]; then
 	echo "donor node is $NODE_DONOR"
 	stop_mariadb
-	write_config_galera "$CLUSTER_NAME" "$NODE_DONOR,$HOST_IP"
+	write_config_galera "$CLUSTER_NAME" "$NODE_DONOR,$HOST_IP" "$SST_DONOR"
 	start_mariadb
 else
 	echo "donor node is current node $HOST_IP"

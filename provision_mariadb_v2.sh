@@ -1,15 +1,16 @@
 #!/usr/bin/bash
 
 HOST=$(hostname)
-HOST_IP=$(hostname -I)
+HOST_IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}' || hostname -I)
 
 NODE_DONOR=""
 CLUSTER_NAME="cluster_1"
+SST_DONOR=""
 
-while getopts "c:d:h" opt; do
+while getopts "c:d:s:h" opt; do
   case ${opt} in
     h ) 
-      echo "Usage: $0 [-h help] [-c cluster_name] [-d donor_ip]" >&2
+      echo "Usage: $0 [-h help] [-c cluster_name] [-d donor_ip] [-s sst_donor]" >&2
       exit 0
       ;;
     c ) 
@@ -17,6 +18,9 @@ while getopts "c:d:h" opt; do
       ;;
     d ) 
       NODE_DONOR=$OPTARG
+      ;;
+    s ) 
+      SST_DONOR=$OPTARG
       ;;
     \? ) 
       echo "Invalid option"
@@ -167,14 +171,14 @@ echo "configuring node $HOST ..."
 if [[ $NODE_DONOR != $HOST_IP ]]; then
 	echo "donor node is $NODE_DONOR"
 	stop_mariadb
-	write_config_galera "$CLUSTER_NAME" "$NODE_DONOR,$HOST_IP"
+	write_config_galera "$CLUSTER_NAME" "$NODE_DONOR,$HOST_IP" "$([[ -n "$SST_DONOR" ]] && echo "$SST_DONOR")"
 	start_mariadb
 else
 	echo "donor node is current node $HOST_IP"
 	download_sampledb
 	extract_sampledb
 	write_config_galera "$CLUSTER_NAME" "$HOST_IP"
-	stop_mariadb
+	stop_mariadb``
 	galera_new_cluster
 fi
 

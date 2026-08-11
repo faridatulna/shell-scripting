@@ -2,18 +2,30 @@
 
 HOST=$(hostname)
 HOST_IP=$(hostname -I)
-CLUSTER_NAME=cluster_1
 
+NODE_DONOR=""
+CLUSTER_NAME="cluster_1"
 
-# get donor node from command line argument, if not provided, use HOST_IP -> current node as donor
-if [[ -z "${1:-}" ]]; then
-	read -r -p "no donor argument given, this node will bootstrap a NEW cluster using itself ($HOST_IP) as donor. Continue? [y/N] " confirm
-	if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-		echo "aborted by user"
-		exit 1
-	fi
-	NODE_DONOR="$HOST_IP"
-elif [[ "$1" == "$HOST_IP" ]]; then
+while getopts "c:d:h" opt; do
+  case ${opt} in
+    h ) 
+      echo "Usage: $0 [-h help] [-c cluster_name] [-d donor_ip]" >&2
+      exit 0
+      ;;
+    c ) 
+      CLUSTER_NAME=$OPTARG
+      ;;
+    d ) 
+      NODE_DONOR=$OPTARG
+      ;;
+    \? ) 
+      echo "Invalid option"
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "${NODE_DONOR:-}" ]]; then
 	echo "donor argument matches this node's IP ($HOST_IP), self-bootstrap"
 	NODE_DONOR="$HOST_IP"
 fi

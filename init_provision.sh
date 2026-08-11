@@ -30,8 +30,8 @@ fi
 
 # Transfer the provisioning scripts to the new instance
 echo "Transferring provisioning scripts to the new instance..."
-multipass transfer provision_mariadb_2.sh galera.cnf.tmpl "$HOST_NAME":/home/ubuntu/
+multipass transfer provision_mariadb_v2.sh galera.cnf.tmpl "$HOST_NAME":/home/ubuntu/
 
 # Execute the provisioning script on the new instance
 echo "Executing the provisioning script on the $HOST_NAME instance with cluster_name=$CLUSTER_NAME $([[ -n "$DONOR_IP" ]] && echo "donor_ip=$DONOR_IP")..."
-multipass exec "$HOST_NAME" -- bash -c "chmod +x /home/ubuntu/provision_mariadb_2.sh && /home/ubuntu/provision_mariadb_2.sh -c $CLUSTER_NAME $([[ -n "$DONOR_IP" ]] && echo "-d $DONOR_IP")"
+multipass exec "$HOST_NAME" -- bash -c "chmod +x /home/ubuntu/provision_mariadb_v2.sh && /home/ubuntu/provision_mariadb_v2.sh -c $CLUSTER_NAME $([[ -n "$DONOR_IP" ]] && echo "-d $DONOR_IP")"

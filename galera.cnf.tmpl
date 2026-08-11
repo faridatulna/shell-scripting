@@ -1,0 +1,19 @@
+[mysqld]
+# base config
+bind_address=0.0.0.0
+default_storage_engine=InnoDB
+binlog_format=row
+innodb_autoinc_lock_mode=2
+wsrep_on=ON
+
+
+# cluster config
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name={{CLUSTER_NAME}}
+wsrep_cluster_address=gcomm://{{CLUSTER_ADDRESS}}
+wsrep_sst_method=rsync
+
+# node config
+wsrep_node_address={{HOST_ADDRESS}}
+wsrep_node_name={{HOST_NAME}}
+wsrep_sst_donor={{SST_DONOR}}

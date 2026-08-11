@@ -57,11 +57,11 @@ for i in {1..3}; do
     SST_DONOR=""
   elif [[ $i -eq 2 ]]; then
     # Second node, first node is donor
-    DONOR_IP="${multipass exec mariadb-node-1 -- ip route get 1.1.1.1 | awk '{print $7; exit}' || hostname -I}"
+    DONOR_IP="$(multipass exec mariadb-node-1 -- sh -c 'ip route get 1.1.1.1 | awk "{print \$7; exit}" || hostname -I')"
     SST_DONOR=""
   else
     # Third node, second node is donor and SST donor
-    DONOR_IP="${multipass exec mariadb-node-2 -- ip route get 1.1.1.1 | awk '{print $7; exit}' || hostname -I}"
+    DONOR_IP="$(multipass exec mariadb-node-2 -- sh -c 'ip route get 1.1.1.1 | awk "{print \$7; exit}" || hostname -I')"
     SST_DONOR="mariadb-node-2"
   fi
 

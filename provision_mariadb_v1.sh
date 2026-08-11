@@ -4,7 +4,6 @@ HOST=$(hostname)
 HOST_IP=$(hostname -I)
 CLUSTER_NAME=cluster_1
 
-
 # get donor node from command line argument, if not provided, use HOST_IP -> current node as donor
 if [[ -z "${1:-}" ]]; then
 	read -r -p "no donor argument given, this node will bootstrap a NEW cluster using itself ($HOST_IP) as donor. Continue? [y/N] " confirm

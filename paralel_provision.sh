@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -euox pipefail
+# set -euox pipefail
 
 CLUSTER_NAME=""
 
@@ -180,9 +180,9 @@ done
 #     - mariadb-node-2 & mariadb-node-3: node donor 1
 pid4s=()  # Array to hold the PIDs of background processes
 
-stop_mariadb ${nodes[0]} && multipass exec ${nodes[0]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME" & pid4s+=($!)
-stop_mariadb ${nodes[1]} && multipass exec ${nodes[1]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[0]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]')" & pid4s+=($!)
-stop_mariadb ${nodes[2]} && multipass exec ${nodes[2]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[1]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]') -s "${nodes[1]}"" & pid4s+=($!)
+stop_mariadb "${nodes[0]}" && multipass exec "${nodes[0]}" -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME" & pid4s+=($!)
+stop_mariadb "${nodes[1]}" && multipass exec "${nodes[1]}" -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[0]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]')" & pid4s+=($!)
+stop_mariadb "${nodes[2]}" && multipass exec "${nodes[2]}" -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[1]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]') -s "${nodes[1]}"" & pid4s+=($!)
 
 fail=0
 # Wait for all background processes to complete
@@ -192,13 +192,13 @@ for pid in "${pid4s[@]}"; do
 done
 ((fail)) && echo "One or more instances failed to configure galera" && exit 1
 # =========== 5. mariadb-node-1: create new galera cluster ===========
-multipass exec ${nodes[0]} -- bash -c "sudo galera_new_cluster"
+multipass exec "${nodes[0]}" -- bash -c "sudo galera_new_cluster"
 
 # =========== 6. mariadb-node-2 & mariadb-node-3: start mariadb ===========
 
 pid6s=()  # Array to hold the PIDs of background processes
-start_mariadb ${nodes[1]} & pid6s+=($!)
-start_mariadb ${nodes[2]} & pid6s+=($!)
+start_mariadb "${nodes[1]}" & pid6s+=($!)
+start_mariadb "${nodes[2]}" & pid6s+=($!)
 fail=0
 # Wait for all background processes to complete
 for pid in "${pid6s[@]}"; do
@@ -209,4 +209,4 @@ done
 
 # =========== 7. mariadb-node-1: download, extract & dump db sample ===========
 
-multipass exec ${nodes[0]} -- bash -c "$(typeset -f download_sampledb); $(typeset -f extract_sampledb); download_sampledb; extract_sampledb"
+multipass exec "${nodes[0]}" -- bash -c "$(typeset -f download_sampledb); $(typeset -f extract_sampledb); download_sampledb; extract_sampledb"

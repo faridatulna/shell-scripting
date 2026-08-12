@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+set -euox pipefail
+
 CLUSTER_NAME=""
 
 while getopts "hc:" opt; do
@@ -178,9 +180,9 @@ done
 #     - mariadb-node-2 & mariadb-node-3: node donor 1
 pid4s=()  # Array to hold the PIDs of background processes
 
-multipass exec ${nodes[0]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME" & pid4s+=($!)
-multipass exec ${nodes[1]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[0]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]')" & pid4s+=($!)
-multipass exec ${nodes[2]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[1]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]') -s "${nodes[1]}"" & pid4s+=($!)
+stop_mariadb ${nodes[0]} && multipass exec ${nodes[0]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME" & pid4s+=($!)
+stop_mariadb ${nodes[1]} && multipass exec ${nodes[1]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[0]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]')" & pid4s+=($!)
+stop_mariadb ${nodes[2]} && multipass exec ${nodes[2]} -- bash -c "chmod +x /home/ubuntu/config_galera_mariadb.sh && /home/ubuntu/config_galera_mariadb.sh -c $CLUSTER_NAME -d $(multipass info "${nodes[1]}" | grep IPv4|cut -d: -f2 | tr -d '[:blank:]') -s "${nodes[1]}"" & pid4s+=($!)
 
 fail=0
 # Wait for all background processes to complete
@@ -195,8 +197,8 @@ multipass exec ${nodes[0]} -- bash -c "sudo galera_new_cluster"
 # =========== 6. mariadb-node-2 & mariadb-node-3: start mariadb ===========
 
 pid6s=()  # Array to hold the PIDs of background processes
-multipass exec ${nodes[1]} -- bash -c "sudo systemctl start mariadb" & pid6s+=($!)
-multipass exec ${nodes[2]} -- bash -c "sudo systemctl start mariadb" & pid6s+=($!)
+start_mariadb ${nodes[1]} & pid6s+=($!)
+start_mariadb ${nodes[2]} & pid6s+=($!)
 fail=0
 # Wait for all background processes to complete
 for pid in "${pid6s[@]}"; do

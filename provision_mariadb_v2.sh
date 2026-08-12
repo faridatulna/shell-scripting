@@ -178,7 +178,7 @@ else
 	download_sampledb
 	extract_sampledb
 	write_config_galera "$CLUSTER_NAME" "$HOST_IP"
-	stop_mariadb``
+	stop_mariadb
 	galera_new_cluster
 fi
 

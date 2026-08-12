@@ -1,0 +1,20 @@
+1. create 3 new instances
+2. transfer galera.cnf.tmpl to each instance
+3. execute first node
+    - install mariadb
+    - prepare db sample
+        - download db sample
+        - extract db sample
+        - dump db sample
+    - stop mariadb
+    - configure galera
+        - modify template galera.cnf.tmpl
+        - copy template galera.cnf.tmpl ke /etc/mysql/mariadb.conf.d/60-galera.cnf
+    - create new galera cluster
+4. execute second node and third node
+    - install mariadb
+    - stop mariadb
+    - configure galera
+        - modify template galera.cnf.tmpl
+        - copy template galera.cnf.tmpl ke /etc/mysql/mariadb.conf.d/60-galera.cnf
+    - start mariadb
